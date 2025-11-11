@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kani VI TTS Demo</title>
+    <style>
+      :root {
+        color-scheme: light;
+      }
+      body {
+        margin: 0 auto;
+        max-width: 780px;
+        padding: 36px 20px 48px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #f4f5fb;
+        color: #1f2933;
+      }
+      .card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 28px;
+        box-shadow: 0 28px 80px rgba(15, 23, 42, 0.1);
+      }
+      h1 {
+        margin: 0 0 12px;
+        font-size: 28px;
+        font-weight: 700;
+      }
+      p.lead {
+        margin: 0 0 20px;
+        color: #4b5563;
+        line-height: 1.5;
+      }
+      label {
+        display: block;
+        margin: 22px 0 8px;
+        font-weight: 600;
+        color: #2d3748;
+      }
+      textarea {
+        width: 100%;
+        min-height: 140px;
+        padding: 14px;
+        border-radius: 10px;
+        border: 1.5px solid #cdd3e1;
+        font-size: 15px;
+        resize: vertical;
+        box-sizing: border-box;
+        transition: border 0.15s ease, box-shadow 0.15s ease;
+      }
+      textarea:focus {
+        outline: none;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+      }
+      .radio-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px 18px;
+      }
+      .radio-group label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 500;
+        margin: 0;
+        color: #4b5563;
+      }
+      .controls {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 14px;
+      }
+      .controls label {
+        font-weight: 500;
+        margin: 0;
+      }
+      .button-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        margin-top: 22px;
+      }
+      button {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: #fff;
+        box-shadow: 0 14px 30px rgba(37, 99, 235, 0.28);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      }
+      button.secondary {
+        background: linear-gradient(135deg, #06b6d4, #0ea5e9);
+        box-shadow: 0 14px 30px rgba(14, 165, 233, 0.28);
+      }
+      button:disabled {
+        background: #9aa4bc;
+        box-shadow: none;
+        cursor: not-allowed;
+      }
+      button:not(:disabled):hover {
+        transform: translateY(-1px);
+        box-shadow: 0 16px 34px rgba(37, 99, 235, 0.32);
+      }
+      .status {
+        min-height: 22px;
+        margin-top: 18px;
+        font-size: 14px;
+        color: #1f2933;
+      }
+      audio {
+        width: 100%;
+        margin-top: 22px;
+      }
+      #download {
+        margin-top: 12px;
+        background: linear-gradient(135deg, #10b981, #059669);
+        box-shadow: 0 14px 30px rgba(16, 185, 129, 0.28);
+      }
+      @media (max-width: 640px) {
+        body {
+          padding: 24px 16px 36px;
+        }
+        button,
+        .button-row {
+          width: 100%;
+        }
+        button {
+          justify-content: center;
+        }
+        .controls {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Kani VI TTS Demo</h1>
+      <p class="lead">
+        So sánh hai phương thức suy luận: <strong>Streaming</strong> (phát từng phần theo thời gian thực) và
+        <strong>Inference thường</strong> (đợi xong toàn bộ rồi phát). Cả hai đều sử dụng cùng mô hình phía server.
+      </p>
+
+      <label for="text">Nội dung cần đọc</label>
+      <textarea id="text">Ông biết hiện giờ nhiều người không còn thích đọc sách nữa, thế nên dù ai đó chỉ vô tình ghé hiệu sách, ông cũng đều trân trọng cả.</textarea>
+
+      <label>Giọng đọc</label>
+      <div class="radio-group" id="speakers">
+        <label><input type="radio" name="speaker" value="nam-mien-nam" checked /> Hùng – Nam miền Nam</label>
+        <label><input type="radio" name="speaker" value="nam-mien-bac" /> Khoa – Nam miền Bắc</label>
+        <label><input type="radio" name="speaker" value="nu-mien-nam" /> Trinh – Nữ miền Nam</label>
+        <label><input type="radio" name="speaker" value="david" /> David – English (British)</label>
+        <label><input type="radio" name="speaker" value="puck" /> Puck – English (Gemini)</label>
+        <label><input type="radio" name="speaker" value="kore" /> Kore – English (Gemini)</label>
+        <label><input type="radio" name="speaker" value="andrew" /> Andrew – English</label>
+        <label><input type="radio" name="speaker" value="jenny" /> Jenny – English (Irish)</label>
+        <label><input type="radio" name="speaker" value="simon" /> Simon – English</label>
+        <label><input type="radio" name="speaker" value="katie" /> Katie – English</label>
+        <label><input type="radio" name="speaker" value="seulgi" /> Seulgi – Korean</label>
+        <label><input type="radio" name="speaker" value="bert" /> Bert – German</label>
+        <label><input type="radio" name="speaker" value="thorsten" /> Thorsten – German (Hessisch)</label>
+        <label><input type="radio" name="speaker" value="maria" /> Maria – Spanish</label>
+        <label><input type="radio" name="speaker" value="mei" /> Mei – Chinese (Cantonese)</label>
+        <label><input type="radio" name="speaker" value="ming" /> Ming – Chinese (Shanghai OpenAI)</label>
+        <label><input type="radio" name="speaker" value="karim" /> Karim – Arabic</label>
+        <label><input type="radio" name="speaker" value="nur" /> Nur – Arabic</label>
+        <label><input type="radio" name="speaker" value="" /> Không chỉ định</label>
+      </div>
+
+      <div class="controls">
+        <label>
+          <input type="checkbox" id="normalize" checked />
+          Chuẩn hoá số sang chữ
+        </label>
+      </div>
+
+      <div class="button-row">
+        <button id="streamBtn">📡 Stream Audio</button>
+        <button id="inferBtn" class="secondary">🎧 Inference thường</button>
+      </div>
+      <div class="status" id="status"></div>
+
+      <audio id="player" controls preload="none"></audio>
+      <button id="download" style="display:none;">💾 Tải file WAV</button>
+    </div>
+
+    <script>
+      const streamBtn = document.getElementById("streamBtn");
+      const inferBtn = document.getElementById("inferBtn");
+      const statusEl = document.getElementById("status");
+      const player = document.getElementById("player");
+      const downloadBtn = document.getElementById("download");
+      let currentAudioUrl = null;
+
+      const PREBUFFER_CHUNKS = 1;
+      const MIN_BUFFER_FACTOR = 0.5;
+
+      const getText = () => document.getElementById("text").value.trim();
+      const getSpeaker = () => {
+        const radios = document.querySelectorAll('input[name="speaker"]');
+        for (const radio of radios) {
+          if (radio.checked) {
+            const value = radio.value.trim();
+            return value.length ? value : null;
+          }
+        }
+        return null;
+      };
+      const getNormalize = () => document.getElementById("normalize").checked;
+
+      const setStatus = (msg) => (statusEl.textContent = msg || "");
+
+      const toggleButtons = (disabled) => {
+        streamBtn.disabled = disabled;
+        inferBtn.disabled = disabled;
+      };
+
+      const resetAudio = () => {
+        if (currentAudioUrl) {
+          URL.revokeObjectURL(currentAudioUrl);
+          currentAudioUrl = null;
+        }
+        player.removeAttribute("src");
+      };
+
+      streamBtn.addEventListener("click", () => {
+        runStreaming().catch((err) => {
+          console.error(err);
+          setStatus("❌ Lỗi streaming: " + err.message);
+          toggleButtons(false);
+        });
+      });
+
+      inferBtn.addEventListener("click", () => {
+        runInference().catch((err) => {
+          console.error(err);
+          setStatus("❌ Lỗi inference: " + err.message);
+          toggleButtons(false);
+        });
+      });
+
+      async function runStreaming() {
+        const text = getText();
+        if (!text) {
+          setStatus("⚠️ Vui lòng nhập nội dung.");
+          return;
+        }
+
+        toggleButtons(true);
+        downloadBtn.style.display = "none";
+        resetAudio();
+
+        const payload = {
+          text,
+          speaker_id: getSpeaker(),
+          normalize: getNormalize(),
+        };
+
+        setStatus("⏳ Gọi API streaming...");
+        const t0 = performance.now();
+
+        const response = await fetch("/stream-tts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok || !response.body) {
+          toggleButtons(false);
+          throw new Error(response.statusText || "Không nhận được phản hồi hợp lệ.");
+        }
+
+        const sampleRate = parseInt(response.headers.get("X-Sample-Rate") ?? "22050", 10);
+        const { pcmBytes, playbackDuration } = await streamAndPlay(response.body, sampleRate);
+        toggleButtons(false);
+
+        if (!pcmBytes) {
+          setStatus("❌ Không nhận được dữ liệu audio.");
+          return;
+        }
+
+        const totalSec = (performance.now() - t0) / 1000;
+        attachAudioResult(
+          pcmBytes,
+          sampleRate,
+          `Streaming hoàn tất sau ${totalSec.toFixed(2)}s (thời gian phát ~${playbackDuration.toFixed(
+            2
+          )}s).`
+        );
+      }
+
+      async function runInference() {
+        const text = getText();
+        if (!text) {
+          setStatus("⚠️ Vui lòng nhập nội dung.");
+          return;
+        }
+
+        toggleButtons(true);
+        downloadBtn.style.display = "none";
+        resetAudio();
+        setStatus("⏳ Đang chạy inference thường...");
+
+        const payload = {
+          text,
+          speaker_id: getSpeaker(),
+          normalize: getNormalize(),
+        };
+        const t0 = performance.now();
+
+        const response = await fetch("/tts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        toggleButtons(false);
+
+        if (!response.ok) {
+          const detail = await response.json().catch(() => ({}));
+          throw new Error(detail.detail || response.statusText || "Không rõ lỗi.");
+        }
+
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        currentAudioUrl = url;
+        player.src = url;
+        const totalSec = (performance.now() - t0) / 1000;
+        setStatus(`✅ Inference thường hoàn tất sau ${totalSec.toFixed(2)}s.`);
+        downloadBtn.style.display = "inline-flex";
+        downloadBtn.onclick = () => downloadBlob(url, "kani-vi-inference");
+      }
+
+      async function streamAndPlay(body, sampleRate) {
+        const reader = body.getReader();
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)({
+          sampleRate,
+        });
+        await audioCtx.resume();
+
+        let bufferedChunks = 0;
+        let playbackStarted = false;
+        let nextStart = audioCtx.currentTime + 0.08;
+        let lastScheduled = nextStart;
+        let totalAudioDuration = 0;
+
+        const pcmChunks = [];
+        let buffer = new Uint8Array(0);
+        let ended = false;
+
+        setStatus("📡 Đang nhận và phát audio streaming...");
+
+        while (!ended) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          if (!value) continue;
+
+          const merged = new Uint8Array(buffer.length + value.length);
+          merged.set(buffer, 0);
+          merged.set(value, buffer.length);
+          buffer = merged;
+
+          let offset = 0;
+          while (offset + 4 <= buffer.length) {
+            const chunkLen = new DataView(buffer.buffer, buffer.byteOffset + offset, 4).getUint32(0, true);
+            offset += 4;
+
+            if (chunkLen === 0xffffffff) {
+              throw new Error("Server báo lỗi trong quá trình streaming.");
+            }
+            if (chunkLen === 0) {
+              ended = true;
+              break;
+            }
+            if (offset + chunkLen > buffer.length) {
+              offset -= 4;
+              break;
+            }
+
+            const chunk = buffer.slice(offset, offset + chunkLen);
+            offset += chunkLen;
+            pcmChunks.push(chunk);
+
+            const float32 = int16ToFloat32(chunk);
+            const audioBuffer = audioCtx.createBuffer(1, float32.length, sampleRate);
+            audioBuffer.getChannelData(0).set(float32);
+            const source = audioCtx.createBufferSource();
+            source.buffer = audioBuffer;
+            source.connect(audioCtx.destination);
+
+            const chunkDuration = audioBuffer.duration;
+            totalAudioDuration += chunkDuration;
+
+            if (!playbackStarted) {
+              bufferedChunks += 1;
+              if (bufferedChunks >= PREBUFFER_CHUNKS) {
+                playbackStarted = true;
+                nextStart = Math.max(audioCtx.currentTime + 0.05, nextStart);
+              }
+            }
+
+            if (playbackStarted) {
+              const now = audioCtx.currentTime;
+              const minAhead = chunkDuration * MIN_BUFFER_FACTOR;
+              if (nextStart - now < minAhead) {
+                nextStart = now + minAhead;
+              }
+              source.start(nextStart);
+              lastScheduled = nextStart + chunkDuration;
+              nextStart += chunkDuration;
+            }
+          }
+
+          buffer = buffer.slice(offset);
+        }
+
+        await reader.cancel();
+
+        if (!pcmChunks.length) {
+          return { pcmBytes: null, playbackDuration: 0 };
+        }
+
+        if (playbackStarted) {
+          await waitForPlayback(audioCtx, lastScheduled);
+        }
+
+        return { pcmBytes: concatBuffers(pcmChunks), playbackDuration: totalAudioDuration };
+      }
+
+      function waitForPlayback(ctx, endTime) {
+        return new Promise((resolve) => {
+          const poll = () => {
+            if (ctx.currentTime >= endTime) {
+              resolve();
+            } else {
+              requestAnimationFrame(poll);
+            }
+          };
+          poll();
+        });
+      }
+
+      function concatBuffers(buffers) {
+        let total = 0;
+        for (const buf of buffers) total += buf.length;
+        const merged = new Uint8Array(total);
+        let offset = 0;
+        for (const buf of buffers) {
+          merged.set(buf, offset);
+          offset += buf.length;
+        }
+        return merged;
+      }
+
+      function int16ToFloat32(chunk) {
+        const int16 = new Int16Array(chunk.buffer, chunk.byteOffset, chunk.length / 2);
+        const float32 = new Float32Array(int16.length);
+        for (let i = 0; i < int16.length; i++) {
+          float32[i] = int16[i] / 32768.0;
+        }
+        return float32;
+      }
+
+      function pcm16ToWav(pcmBytes, sampleRate) {
+        const dataSize = pcmBytes.length;
+        const buffer = new ArrayBuffer(44 + dataSize);
+        const view = new DataView(buffer);
+
+        writeString(view, 0, "RIFF");
+        view.setUint32(4, 36 + dataSize, true);
+        writeString(view, 8, "WAVE");
+
+        writeString(view, 12, "fmt ");
+        view.setUint32(16, 16, true);
+        view.setUint16(20, 1, true);
+        view.setUint16(22, 1, true);
+        view.setUint32(24, sampleRate, true);
+        view.setUint32(28, sampleRate * 2, true);
+        view.setUint16(32, 2, true);
+        view.setUint16(34, 16, true);
+
+        writeString(view, 36, "data");
+        view.setUint32(40, dataSize, true);
+
+        const pcmView = new Uint8Array(buffer, 44, dataSize);
+        pcmView.set(pcmBytes);
+
+        return buffer;
+      }
+
+      function writeString(view, offset, str) {
+        for (let i = 0; i < str.length; i++) {
+          view.setUint8(offset + i, str.charCodeAt(i));
+        }
+      }
+
+      function attachAudioResult(pcmBytes, sampleRate, message) {
+        const wavBytes = pcm16ToWav(pcmBytes, sampleRate);
+        const blob = new Blob([wavBytes], { type: "audio/wav" });
+        const url = URL.createObjectURL(blob);
+        currentAudioUrl = url;
+        player.src = url;
+        setStatus(`✅ ${message}`);
+        downloadBtn.style.display = "inline-flex";
+        downloadBtn.onclick = () => downloadBlob(url, "kani-vi-stream");
+      }
+
+      function downloadBlob(url, prefix) {
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${prefix}-${Date.now()}.wav`;
+        a.click();
+      }
+
+      window.addEventListener("beforeunload", () => {
+        if (currentAudioUrl) {
+          URL.revokeObjectURL(currentAudioUrl);
+        }
+      });
+    </script>
+  </body>
+</html>
+

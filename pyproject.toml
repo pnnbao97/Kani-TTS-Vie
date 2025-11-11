@@ -21,6 +21,7 @@ dependencies = [
     "transformers",
     "huggingface-hub>=1.1.2",
     "soundfile",
+    "gradio>=4.29",
 ]
 
 [tool.uv.sources]

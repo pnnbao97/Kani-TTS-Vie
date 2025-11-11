@@ -1,112 +1,125 @@
-# Kani Vi – Vietnamese TTS Pipeline
+![Kani TTS Vie](public/logo.png)
 
-This project contains code and notebooks for inference and fine-tuning of a Vietnamese text-to-speech system built on top of NVIDIA NeMo codecs and a Hugging Face causal language model.
+# 😻 Kani TTS Vie
 
-## Project Layout
+Fast and expressive Vietnamese text-to-speech built on top of the Kani 370M family.  
+This repository powers both local inference scripts and the UI/API demos that accompany the
+[pnnbao-ump/kani-tts-370m-vie](https://huggingface.co/pnnbao-ump/kani-tts-370m-vie) release on Hugging Face.
 
-- `main.py` – End-to-end inference script that logs into Hugging Face (via `HF_TOKEN`), loads the NeMo codec and causal LM, generates speech for one or more speaker IDs, and writes WAV files.
-- `kani-tts-inference.ipynb` – Reference notebook that documents the inference pipeline in detail (token layout, sampling parameters, speaker control, number-to-word conversion, etc.).
-- `prepare_dataset.ipynb` – Notebook for dataset preparation (number normalization, token mapping, shard processing).
-- `finetune/` – Notebooks dedicated to LoRA-based fine-tuning (`finetune/kani-tts-vi-finetune.ipynb`) and dataset preparation within the fine-tuning workflow.
-- `pyproject.toml`, `uv.lock` – Dependency management via [uv](https://github.com/astral-sh/uv).
+## Highlights
 
-Large artifacts such as generated audio (`audio-*.wav`) are ignored by default; keep them out of the repository to avoid unnecessary bloat.
+- 🚀 **Fast inference** – ~3 s for short paragraphs on a single GPU, real-time factor around 0.1–0.3×.
+- 🎭 **Multi-speaker** – 18 curated voices spanning Vietnamese, English, Korean, German, Spanish, Chinese, and Arabic.
+- 🧩 **Composable components** – `gradio_app.py` for a sleek non-streaming demo, `server.py` for FastAPI (streaming + batch), and `client/index.html` for a lightweight web UI.
+- 📓 **Notebooks included** – End-to-end inference, dataset preparation, and LoRA fine-tuning workflows inside `finetune/`.
 
-## Environment Setup
+## Supported Voices
 
-1. **Python and uv**  
-   Install uv (e.g. `curl -LsSf https://astral.sh/install.sh | sh`) and ensure Python 3.12.x is available.
+| Locale | Voices |
+| ------ | ------ |
+| Vietnamese | Khoa (north male), Hùng (south male), Trinh (south female) |
+| English | David (British), Puck (Gemini), Kore (Gemini), Andrew, Jenny (Irish), Simon, Katie |
+| Korean | Seulgi |
+| German | Bert, Thorsten (Hessisch) |
+| Spanish | Maria |
+| Chinese | Mei (Cantonese), Ming (Shanghai) |
+| Arabic | Karim, Nur |
+| Neutral | No speaker ID (`None`) |
 
-2. **Create the virtual environment**  
-   ```bash
-   uv sync
-   ```
+> Streaming is not exposed inside the Gradio demo.  
+> For a full streaming experience use the reference implementation at [pnnbao97/Kani-TTS-Vie](https://github.com/pnnbao97/Kani-TTS-Vie).
 
-3. **Hugging Face credentials**  
-   The code expects an environment variable `HF_TOKEN` or prior CLI login:
-   ```bash
-   export HF_TOKEN=hf_xxx                # temporary for current shell
-   # or
-   uv run -- huggingface-cli login       # stores token in your keyring/cache
-   ```
-   > **Never hardcode tokens** in source files. Store them in environment variables or a `.env` file that is excluded from version control.
+## Repository Layout
 
-4. **Optional runtime tools**  
-   - `sudo apt install ffmpeg` (inside WSL/Linux) to avoid pydub warnings when playing audio.
+- `main.py` – simple CLI inference script (batch mode).
+- `gradio_app.py` – polished Gradio Blocks demo with animated loader + multi-language voices.
+- `server.py` – FastAPI service exposing `/tts` and `/stream-tts`.
+- `client/index.html` – static frontend that talks to the FastAPI server.
+- `kani_vie/` – core model orchestration, streaming helpers, and audio player utilities.
+- `finetune/` – notebooks for LoRA training and dataset preparation.
+- `requirements.txt` / `pyproject.toml` – dependency manifests (pip or uv).
 
-## Quick Inference Guide
+## Prerequisites
 
-### 1. Install dependencies
+1. **Python 3.12** (or the version pinned in `.python-version`).
+2. **GPU drivers + CUDA** compatible with your PyTorch install.
+3. **ffmpeg** (optional but recommended for audio tooling).
+4. **Hugging Face access token** with rights to download the base checkpoints.
+
+Install dependencies using either `uv` (recommended) or `pip`:
 
 ```bash
+# Using uv
 uv sync
+
+# Or using pip
+python -m venv .venv
+source .venv/bin/activate  # .venv\Scripts\activate on Windows
+pip install -r requirements.txt
 ```
 
-### 2. Configure Hugging Face credentials
+## Usage
+
+### 1. Command-line inference
 
 ```bash
-export HF_TOKEN=hf_your_token_here    # current shell only
-# or persist credentials:
-uv run -- huggingface-cli login
+uv run python main.py \
+  --text "Xin chào! Tôi là Kani TTS." \
+  --speaker_id "nam-mien-nam"
 ```
 
-> **Never hardcode tokens** in source files. Store them in environment variables or a `.env` file that is excluded from version control.
+This writes WAV files to disk for each requested speaker.
 
-### 3. Run the inference script
+### 2. Gradio demo (non-streaming)
 
 ```bash
-uv run python main.py
+uv run python gradio_app.py
 ```
 
-`main.py` by default:
+Open the reported URL (default `http://127.0.0.1:7860`).  
+The app auto-normalises text, estimates run time, and previews progress with a custom equaliser animation.
 
-- Instantiates `NemoAudioPlayer` and `KaniModel`.
-- Generates responses for multiple speaker IDs (`nu-mien-bac`, `nu-mien-nam`, `nam-mien-bac`, `nam-mien-nam`).
-- Saves normalized audio to disk with `soundfile` (22.05 kHz WAV).
+### 3. FastAPI server + static web client
 
-Customize it by editing the `prompt`, adjusting sampling parameters in `Config`, or wiring in the `convert_numbers_to_words` helper from the notebook for number normalization.
+Run the API:
 
-## Dataset Preparation & Fine-Tuning
+```bash
+uv run uvicorn server:app --host 0.0.0.0 --port 8000
+```
 
-1. **`prepare_dataset.ipynb`**  
-   - Converts raw transcripts to token sequences.
-   - Demonstrates number normalization and token boundary handling.
+Serve the vanilla frontend (for example):
 
-2. **`finetune/kani-tts-vi-finetune.ipynb`**  
-   - Walks through LoRA fine-tuning.
-   - Shows how to load multiple Hugging Face datasets, shard them, and train with `transformers.Trainer`.
-   - Saves fine-tuned checkpoints and tokenizer artifacts back to Hugging Face.
+```bash
+python -m http.server 3000 --directory client
+```
 
-Before running the fine-tuning notebook:
+The client exposes both `/tts` (batch) and `/stream-tts` (chunked PCM) flows backed by the FastAPI service.
 
-- Set `HF_TOKEN`.
-- Verify dataset access and quotas.
-- Adjust hyperparameters, speaker IDs, and output directories to match your setup.
+### 4. Notebooks
 
-## Token & Credential Safety
+- `kani-tts-inference.ipynb` – detailed walkthrough of token layout, sampling parameters, and speaker mixing.
+- `prepare_dataset.ipynb` – data cleaning, number normalisation, shard building.
+- `finetune/kani-tts-vi-finetune.ipynb` – LoRA-based fine-tuning recipe.
 
-- **Audit status:** No plain-text Hugging Face tokens or other secrets are present in the repository. All code expects `HF_TOKEN` through the environment.
-- Use `.env` (ignored by git) or shell configuration files to store tokens locally.
-- Avoid committing `uv.lock` updates that might contain private resolver URLs or credentials.
-- Double-check notebook outputs before pushing; remove cells that may contain sensitive logs.
+Launch them with your favourite Jupyter environment after activating the virtual environment.
 
-## Troubleshooting
+## Tips & Troubleshooting
 
-- **WSL filesystem issues:** For best performance, run `uv` and Python from the Linux home directory (`~/kani-vi`) rather than `/mnt/...`.
-- **Dependency conflicts:** The project pins `onnx<1.19` to stay compatible with NeMo 2.5.2; avoid upgrading beyond that unless you also update NeMo.
-- **Audio sounds unnatural:** Ensure `do_sample=True`, temperature/top-p match the notebook, and prompts are pre-normalized (especially numbers).
-- **401 from Hugging Face:** Re-run `huggingface-cli login` or export `HF_TOKEN`. Make sure the model repo is public or that your token has read access.
-
-## License
-
-Add your licensing information here before publishing the repository.
+- **Slow streaming?** Try decreasing `chunk_size` or running on a faster disk/GPU.
+- **Non-Vietnamese inference** still works; simply pick the relevant speaker (e.g., `Seulgi` for Korean).
+- **Environment warnings** about `gradio` or `soundfile` usually mean the virtual environment is missing those packages—run `pip install -r requirements.txt`.
 
 ## Contributing
 
-1. Fork the repo.
-2. Create a feature branch.
-3. Format/lint your changes (follow `uv` workflow).
-4. Submit a pull request describing your improvements.
+Contributions are welcome!  
 
-Feel free to open issues for bugs or feature requests. Happy building!
+1. Fork the repository.
+2. Create a feature branch.
+3. Run linting/tests relevant to your changes.
+4. Open a pull request describing the improvement.
+
+## License
+
+This project is released under the [Apache License 2.0](LICENSE) unless noted otherwise.  
+Please review third-party model and dataset licenses before redistribution.
 
