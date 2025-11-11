@@ -76,6 +76,7 @@ uv run uvicorn server:app
 Mở chúng bằng môi trường Jupyter sau khi kích hoạt virtual environment.
 
 ### Gradio Demo
+[<img width="600" height="595" alt="Kani-TTS-Vie" src="https://github.com/user-attachments/assets/14d36a4e-0cdd-4257-b59c-6a2ed2608819" />](https://github.com/user-attachments/assets/14d36a4e-0cdd-4257-b59c-6a2ed2608819)
 
 Nếu muốn thử nhanh giao diện web đơn giản, bạn có thể chạy ứng dụng Gradio đi kèm:
 
@@ -98,6 +99,7 @@ Chào đón mọi đóng góp!
 
 Dự án này phát hành theo [Apache License 2.0](LICENSE).
 Kiểm tra giấy phép các mô hình/dataset bên thứ ba trước khi phân phối lại.
+
 
 
 
