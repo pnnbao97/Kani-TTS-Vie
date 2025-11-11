@@ -38,7 +38,7 @@ Nghe mẫu sample tại đây: **[Mẫu Giọng Demo (Inferred)]**(https://huggi
     * **Driver & CUDA:** Cần có Driver GPU và CUDA Toolkit tương thích với phiên bản PyTorch đang được sử dụng.
 3.  **Hệ điều hành**
     * **Linux (Khuyến nghị):** Được hỗ trợ nguyên bản.
-    * **Windows:** Bắt buộc phải sử dụng môi trường **WSL 2 (Windows Subsystem for Linux)**.
+    * **Windows:** Bắt buộc phải sử dụng môi trường **WSL 2 (Windows Subsystem for Linux)**. Xem cách cài đặt tại đây: https://learn.microsoft.com/en-us/windows/wsl/install
 4.  **ffmpeg**
 
 Cài đặt dependencies:
@@ -92,3 +92,4 @@ Chào đón mọi đóng góp!
 
 Dự án này phát hành theo [Apache License 2.0](LICENSE).
 Kiểm tra giấy phép các mô hình/dataset bên thứ ba trước khi phân phối lại.
+
