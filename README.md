@@ -34,7 +34,7 @@ Nghe mẫu sample tại đây: https://huggingface.co/pnnbao-ump/kani-tts-370m-v
 
 1.  **Python 3.12**
 2.  **GPU**
-    * **VRAM:** Cần **tối thiểu 3 GB VRAM** trở lên để inference (sinh giọng nói) được mượt mà và ổn định.
+    * **VRAM:** Cần **tối thiểu 2 GB VRAM** để inference (sinh giọng nói) được mượt mà và ổn định.
     * **Driver & CUDA:** Cần có Driver GPU và CUDA Toolkit tương thích với phiên bản PyTorch đang được sử dụng.
 3.  **Hệ điều hành**
     * **Linux (Khuyến nghị):** Được hỗ trợ nguyên bản.
@@ -91,6 +91,7 @@ Chào đón mọi đóng góp!
 
 Dự án này phát hành theo [Apache License 2.0](LICENSE).
 Kiểm tra giấy phép các mô hình/dataset bên thứ ba trước khi phân phối lại.
+
 
 
 
