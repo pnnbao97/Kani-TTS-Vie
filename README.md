@@ -73,9 +73,8 @@ uv run uvicorn server:app
 
 ### Notebooks
 
-* `kani-tts-inference.ipynb` – walkthrough chi tiết token layout, sampling, trộn giọng.
-* `prepare_dataset.ipynb` – dọn dữ liệu, chuẩn hóa số, xây dựng shards.
-* `finetune/kani-tts-vi-finetune.ipynb` – công thức fine-tuning LoRA.
+* `finetune/prepare_dataset.ipynb` – Chuẩn bị dữ liệu để **tinh chỉnh** (fine-tuning) giọng tùy chỉnh.
+* `finetune/kani-tts-vi-finetune.ipynb` – Code **tinh chỉnh LoRA** cho mô hình Kani TTS Vie.
 
 Mở chúng bằng môi trường Jupyter sau khi kích hoạt virtual environment.
 
@@ -92,4 +91,5 @@ Chào đón mọi đóng góp!
 
 Dự án này phát hành theo [Apache License 2.0](LICENSE).
 Kiểm tra giấy phép các mô hình/dataset bên thứ ba trước khi phân phối lại.
+
 
